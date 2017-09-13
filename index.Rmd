@@ -20,9 +20,40 @@ WHERE teamID='NYA' and yearID=1927"
 sqldf(query)
 ```
 
+
+With SQL you can get statistics for a certain team by typing WHERE teamID= whichever team you would like. For instance 
+
+```{r}
+query<-"SELECT playerID, yearID,teamID,HR FROM Batting
+WHERE teamID='NYA' and HR>=40"
+
+sqldf(query)
+```
+
+If you wanted to find a specific statistic between  a number of years, you could do that as well. For example, say you wanted to fin all instances that the Phillies hit more thaan 30 homeruns in the 1970s. You would write the code like this: 
+
+```{r}
+query<-"SELECT playerID,yearID,teamID,HR FROM Batting 
+WHERE teamID='PHI' and yearID<=1979 and yearID>=1970 and HR>30"
+
+sqldf(query)
+```
+
+You can also give the statistic a range. Say you wanted to know all of the instances where a single player had more than 40 homeruns, but less than 60 strikeouts. You would do it like this: 
+
+```{r}
+query<-"SELECT playerID,yearID,teamID,HR,SO FROM Batting 
+WHERE HR>40 and SO<60"
+
+sqldf(query)
+```
+
+
+
+
 ## ORDER BY
 
-With SQL, you can also order the rows in the output. For example, suppose you wanted to see every instance of a player hitting more than 50 homeruns. But you would like the players witht he most homeruns to be at the top of the list. Do it like this: 
+With SQL, you can also order the rows in the output. For example, suppose you wanted to see every instance of a player hitting more than 50 homeruns. But you would like the players with the most homeruns to be at the top of the list. Do it like this: 
 
 ```{r}
 query<-"SELECT playerID,yearID,teamID,HR FROM Batting
@@ -31,4 +62,48 @@ ORDER BY HR DESC"
 
 sqldf (query)
 ```
+
+Let's do another example. Suppose you wanted to find all instances of a player striking out less than ten times. We want to make sure that each player has been at bat at least 400 times, and we want to order it by strike outs in descending order. We would do it like this: 
+
+```{r}
+query<-"SELECT playerID,yearID, teamID,SO,AB FROM Batting 
+WHERE SO<10 and AB >=400
+ORDER BY SO"
+
+sqldf(query)
+```
+
+
+
+##AGGREGATION
+
+With SQL, we can find the aggregate of a statistic. For instance, we can find the summation, average, minimum, or maximum of a set of data, to name a few. You must remember to write GROUP BY in order to tell RScript how to group the information.Let's look at an example. 
+
+Suppose you wanted to find the career total of Babe Ruth.
+You would show that like this:
+
+```{r}
+query<-"SELECT playerID, sum(HR) FROM Batting 
+WHERE playerID='ruthba01' 
+GROUP BY playerID"
+
+sqldf(query)
+```
+
+Another imporant item to remember is that after you have written GROUP BY, you can no longer write WHERE. Instead you should use HAVING. Let's look at another example.
+
+Suppose you wanted to find the career home run totals for all players, bus list only those with a total of 600 or nmore home runs. You want to make sure you have the greates total at the top. You would write it like this: 
+
+
+```{r}
+query<-"SELECT playerID, sum(HR) FROM Batting 
+GROUP BY playerID
+HAVING sum(HR)>=600
+ORDER BY sum(HR) DESC"
+
+sqldf(query)
+```
+
+
+
 
