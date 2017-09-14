@@ -104,6 +104,54 @@ ORDER BY sum(HR) DESC"
 sqldf(query)
 ```
 
+##JOINS 
+
+In our first example, we want to know how many homeruns Babe Ruth has ever hit, what year he hit them, and what team he was playing for when he hit them. 
+We would show that by writing: 
+
+```{r}
+query<-"SELECT playerID,teamID,yearID,HR FROM Batting
+WHERE playerID='ruthba01'"
+
+sqldf(query)
+
+```
 
 
+The problem with the example above, however, is that we only get Babe Ruth's playerID instead of his full name. We can pull Babe Ruth's full name by using the Master file. In order to get his name from the Master file, we have to join the Batting file and Master file together. We join them by saying INNER JOIN. Let's see it written it out: 
+
+```{r}
+query<-"SELECT nameFirst,nameLast,teamID,yearID,HR 
+FROM Batting INNER JOIN Master
+ON Batting.playerID=Master.playerID
+WHERE Batting.playerID='ruthba01'"
+
+sqldf(query)
+
+```
+
+
+Let's try another example. Let's say we would like to find all instances of players hitting more than fifty homeruns. We would like to include the players' first and last name, as well as the team they play for, the year it happened, and, of course, we need to include the home runs. We would write it like this: 
+
+```{r}
+query<-"SELECT nameFirst,nameLast,teamID,yearID,HR 
+FROM Batting INNER JOIN Master
+ON Batting.playerID=Master.playerID
+WHERE HR>50
+ORDER BY HR DESC"
+
+sqldf(query)
+```
+
+Now let's try a different scenerio. The two examples we just did pulled information from the Master file. Let's try pulling information from another file. Let's find all of the teams that Babe Ruth played on where he achieved a home run. We should be sure to include his playerID, the year, the team name, and home runs. Let's try it: 
+
+```{r}
+query<-"SELECT playerID,name,Batting.yearID,Batting.HR
+FROM Batting INNER JOIN Teams 
+ON Batting.teamID=Teams.teamID and 
+Batting.yearID=Teams.yearID
+WHERE playerID='ruthba01'"
+
+sqldf(query)
+```
 
