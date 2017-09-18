@@ -371,7 +371,7 @@ sqldf(query)</code></pre>
 <pre><code>##   playerID sum(HR)
 ## 1 ruthba01     714</code></pre>
 <p>Another imporant item to remember is that after you have written GROUP BY, you can no longer write WHERE. Instead you should use HAVING. Let’s look at another example.</p>
-<p>Suppose you wanted to find the career home run totals for all players, bus list only those with a total of 600 or nmore home runs. You want to make sure you have the greates total at the top. You would write it like this:</p>
+<p>Suppose you wanted to find the career home run totals for all players, but list only those with a total of 600 or more home runs. You want to make sure you have the greatest total at the top. You would write it like this:</p>
 <pre class="r"><code>query&lt;-&quot;SELECT playerID, sum(HR) FROM Batting 
 GROUP BY playerID
 HAVING sum(HR)&gt;=600
@@ -524,6 +524,75 @@ sqldf(query)</code></pre>
 ## 20 ruthba01 New York Yankees   1933 34
 ## 21 ruthba01 New York Yankees   1934 22
 ## 22 ruthba01    Boston Braves   1935  6</code></pre>
+<p>Let’s try a more complicated example. Say we would like to use Babe Ruth as the playerID, and we would like to see Babe Ruth’s first and last name which comes fromt the Master table. We need the yearID and the homeruns from the Batting table. Say we would like to incorporate a third table, the Teams table. We would like to see the names of the teams spelled out. We would take all of that information and write the code as follows:</p>
+<pre class="r"><code>query&lt;-&quot;SELECT nameFirst,nameLast,name,Batting.yearID,Batting.HR
+FROM (Batting INNER JOIN Master
+ON Batting.playerID=Master.playerID) INNER JOIN Teams 
+ON Batting.teamID=Teams.teamID AND Batting.yearID=Teams.yearID
+WHERE Batting.playerID='ruthba01'&quot;
+
+sqldf(query)</code></pre>
+<pre><code>##    nameFirst nameLast             name yearID HR
+## 1       Babe     Ruth   Boston Red Sox   1914  0
+## 2       Babe     Ruth   Boston Red Sox   1915  4
+## 3       Babe     Ruth   Boston Red Sox   1916  3
+## 4       Babe     Ruth   Boston Red Sox   1917  2
+## 5       Babe     Ruth   Boston Red Sox   1918 11
+## 6       Babe     Ruth   Boston Red Sox   1919 29
+## 7       Babe     Ruth New York Yankees   1920 54
+## 8       Babe     Ruth New York Yankees   1921 59
+## 9       Babe     Ruth New York Yankees   1922 35
+## 10      Babe     Ruth New York Yankees   1923 41
+## 11      Babe     Ruth New York Yankees   1924 46
+## 12      Babe     Ruth New York Yankees   1925 25
+## 13      Babe     Ruth New York Yankees   1926 47
+## 14      Babe     Ruth New York Yankees   1927 60
+## 15      Babe     Ruth New York Yankees   1928 54
+## 16      Babe     Ruth New York Yankees   1929 46
+## 17      Babe     Ruth New York Yankees   1930 49
+## 18      Babe     Ruth New York Yankees   1931 46
+## 19      Babe     Ruth New York Yankees   1932 41
+## 20      Babe     Ruth New York Yankees   1933 34
+## 21      Babe     Ruth New York Yankees   1934 22
+## 22      Babe     Ruth    Boston Braves   1935  6</code></pre>
+<p>Now let’s try to get the career totals for all players that hit at least 600 homeruns. We would like to keep the highest homerun totals at the top. We would also like to have the first and last names of the players. We would write it like this:</p>
+<pre class="r"><code>query&lt;-&quot;SELECT nameFirst,nameLast, sum(HR)
+FROM Batting INNER JOIN Master 
+ON Batting.playerID=Master.playerID
+GROUP BY Batting.playerID
+HAVING sum(HR)&gt;=600
+ORDER BY sum(HR) DESC&quot;
+
+
+sqldf(query)</code></pre>
+<pre><code>##   nameFirst  nameLast sum(HR)
+## 1     Barry     Bonds     762
+## 2      Hank     Aaron     755
+## 3      Babe      Ruth     714
+## 4      Alex Rodriguez     696
+## 5    Willie      Mays     660
+## 6       Ken   Griffey     630
+## 7       Jim     Thome     612
+## 8     Sammy      Sosa     609</code></pre>
+<p>Finally, let’s list all players with the first name Bob who averaged more than $1,000,000 in salary over their career. We want to include their last names as well. We would write that as follows:</p>
+<pre class="r"><code>query&lt;-&quot;SELECT nameFirst,nameLast,avg(salary)
+FROM Salaries INNER JOIN Master
+ON Salaries.playerID=Master.playerID
+WHERE nameFirst='Bob'
+GROUP BY Salaries.playerID
+HAVING avg(salary)&gt;1000000
+ORDER BY avg(salary) DESC&quot;
+
+sqldf(query)</code></pre>
+<pre><code>##   nameFirst  nameLast avg(salary)
+## 1       Bob   Wickman     2635813
+## 2       Bob     Welch     1930417
+## 3       Bob     Howry     1804583
+## 4       Bob    Horner     1416667
+## 5       Bob Tewksbury     1288182
+## 6       Bob   Stanley     1067500
+## 7       Bob     Boone     1047580
+## 8       Bob     Ojeda     1035926</code></pre>
 </div>
 
 

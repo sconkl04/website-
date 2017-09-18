@@ -92,7 +92,7 @@ sqldf(query)
 
 Another imporant item to remember is that after you have written GROUP BY, you can no longer write WHERE. Instead you should use HAVING. Let's look at another example.
 
-Suppose you wanted to find the career home run totals for all players, bus list only those with a total of 600 or nmore home runs. You want to make sure you have the greates total at the top. You would write it like this: 
+Suppose you wanted to find the career home run totals for all players, but list only those with a total of 600 or more home runs. You want to make sure you have the greatest total at the top. You would write it like this: 
 
 
 ```{r}
@@ -153,5 +153,47 @@ Batting.yearID=Teams.yearID
 WHERE playerID='ruthba01'"
 
 sqldf(query)
+```
+
+Let's try a more complicated example. Say we would like to use Babe Ruth as the playerID, and we would like to see Babe Ruth's first and last name which comes fromt the Master table. We need the yearID and the homeruns from the Batting table. Say we would like to incorporate a third table, the Teams table. We would like to see the names of the teams spelled out. We would take all of that information and write the code as follows: 
+
+```{r}
+query<-"SELECT nameFirst,nameLast,name,Batting.yearID,Batting.HR
+FROM (Batting INNER JOIN Master
+ON Batting.playerID=Master.playerID) INNER JOIN Teams 
+ON Batting.teamID=Teams.teamID AND Batting.yearID=Teams.yearID
+WHERE Batting.playerID='ruthba01'"
+
+sqldf(query)
+```
+
+Now let's try to get the career totals for all players that hit at least 600 homeruns. We would like to keep the highest homerun totals at the top. We would also like to have the first and last names of the players. We would write it like this: 
+
+```{r}
+query<-"SELECT nameFirst,nameLast, sum(HR)
+FROM Batting INNER JOIN Master 
+ON Batting.playerID=Master.playerID
+GROUP BY Batting.playerID
+HAVING sum(HR)>=600
+ORDER BY sum(HR) DESC"
+
+
+sqldf(query)
+```
+
+Finally, let's list all players with the first name Bob who averaged more than $1,000,000 in salary over their career. We want to include their last names as well. We would write that as follows: 
+
+```{r}
+query<-"SELECT nameFirst,nameLast,avg(salary)
+FROM Salaries INNER JOIN Master
+ON Salaries.playerID=Master.playerID
+WHERE nameFirst='Bob'
+GROUP BY Salaries.playerID
+HAVING avg(salary)>1000000
+ORDER BY avg(salary) DESC"
+
+sqldf(query)
+
+
 ```
 
